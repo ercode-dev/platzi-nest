@@ -28,7 +28,6 @@ export class UsersService {
         return user.profile;
     }
 
-
     private async getUser(id: number) {
         const user = await this.userRepository.findOne({
             where: { id },
