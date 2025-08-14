@@ -11,14 +11,14 @@ export class PostsService {
 
     async findAll() {
         return await this.postsRepository.find({
-            relations: ['user.profile'],
+            relations: ['user.profile', 'categories'],
         });
     }
 
     async findOne(id: number) {
         const post = await this.postsRepository.findOne({
             where: { id },
-            relations: ['user.profile'],
+            relations: ['user.profile', 'categories'],
         });
 
         if (post) {
@@ -33,7 +33,9 @@ export class PostsService {
             const body = {
                 ...createPostDto,
                 user: { id: createPostDto.userId },
+                categories: createPostDto.categories?.map((id) => ({ id })),
             };
+
             const savedPost = await this.postsRepository.save(body);
             return await this.findOne(savedPost.id);
         } catch (e) {
