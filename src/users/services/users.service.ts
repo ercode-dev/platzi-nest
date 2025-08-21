@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import { User } from '../entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -50,7 +50,9 @@ export class UsersService {
 
     async createUser(body: CreateUserDto): Promise<User> {
         try {
-            return await this.userRepository.save(body);
+            const newUser = this.userRepository.create(body);
+            const savedUser = await this.userRepository.save(newUser);
+            return this.findOne(savedUser.id);
         } catch (err) {
             console.error(body, err);
             throw new BadRequestException('Error creating user');
@@ -78,5 +80,12 @@ export class UsersService {
             console.error(e);
             throw new BadRequestException('Error modifying user');
         }
+    }
+
+    async getUserByEmail(email: string): Promise<User | null> {
+        const user = await this.userRepository.findOne({
+            where: { email },
+        });
+        return user;
     }
 }
