@@ -24,8 +24,16 @@ export class UsersService {
     }
 
     async getPostsByUserId(id: number) {
-        const user = await this.findOne(id);
-        return user.profile;
+        const user = await this.userRepository.findOne({
+            where: { id },
+            relations: ['posts'],
+        });
+
+        if (!user) {
+            throw new NotFoundException('Post not found for users');
+        }
+
+        return user.posts;
     }
 
     private async getUser(id: number) {

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from '../dto/create-post.dto';
 import { UpdatePostDto } from '../dto/update-post.dto';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { Post } from '../entities/post.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -35,7 +35,7 @@ export class PostsService {
                 user: { id: createPostDto.userId },
                 categories: createPostDto.categories?.map((id) => ({ id })),
             };
-
+            console.log('Creating post with body:', body);
             const savedPost = await this.postsRepository.save(body);
             return await this.findOne(savedPost.id);
         } catch (e) {
@@ -46,9 +46,9 @@ export class PostsService {
 
     async update(id: number, updatePostDto: UpdatePostDto) {
         try {
-            const actualPost = await this.findOne(id);
-            const newPost = this.postsRepository.merge(actualPost, updatePostDto);
-            const savedPost = await this.postsRepository.save(newPost);
+            const actualPost: Post = await this.findOne(id);
+            const newPost: Post = this.postsRepository.merge(actualPost, updatePostDto as DeepPartial<Post>);
+            const savedPost: Post = await this.postsRepository.save(newPost);
             return savedPost;
         } catch (e) {
             console.error(e);
@@ -64,5 +64,18 @@ export class PostsService {
             console.error(e);
             throw new BadRequestException('Error deleting post');
         }
+    }
+
+    async getPostsByCategory(categoryId: number) {
+        const posts = await this.postsRepository.find({
+            where: { categories: { id: categoryId } },
+            relations: ['user.profile'],
+        });
+
+        if (posts.length === 0) {
+            throw new NotFoundException('No posts found for this category');
+        }
+
+        return posts;
     }
 }
