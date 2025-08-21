@@ -14,7 +14,7 @@ export class User {
     email: string;
 
     @Exclude()
-    @Column({ type: 'varchar', length: 255, select: false })
+    @Column({ type: 'varchar', length: 255 })
     password: string;
 
     @CreateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP', name: 'created_at' })

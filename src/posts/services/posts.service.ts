@@ -35,7 +35,6 @@ export class PostsService {
                 user: { id: createPostDto.userId },
                 categories: createPostDto.categories?.map((id) => ({ id })),
             };
-            console.log('Creating post with body:', body);
             const savedPost = await this.postsRepository.save(body);
             return await this.findOne(savedPost.id);
         } catch (e) {
